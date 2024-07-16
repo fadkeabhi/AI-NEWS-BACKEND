@@ -7,10 +7,51 @@ const {AIGetNewsFromRaw} = require("../utils/gemini")
 
 const { createNews, getNewsByUrl } = require("../utils/mongoNews");
 const { formatDateTime } = require('../utils/time');
+const { getNewsWithPagination } = require('../controllers/NewsController');
+const { rssNDTV } = require('../utils/rss/ndtv');
+const processNewsWithoutSummary = require('../utils/crons/summery');
+
+
+// Fetch news articles with pagination
+router.get('/', async (req, res) => {
+    let { before, after, limit } = req.query;
+    try {
+        if(!limit){limit = 5};
+        const news = await getNewsWithPagination(before, after, parseInt(limit));
+        res.status(200).json(news);
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Error fetching news articles', error });
+    }
+});
+
+
+// Initialise NDTV RSS
+router.get('/invoke/rss/ndtv', async (req, res) => {
+    try {
+        rssNDTV();
+        res.status(200).json({status:"invoked"});
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Error fetching news articles', error });
+    }
+});
+
+
+// Initialise NDTV RSS
+router.get('/invoke/ai/summery', async (req, res) => {
+    try {
+        console.log("AI summery invoked")
+        processNewsWithoutSummary();
+        res.status(200).json({status:"invoked"});
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Error fetching news articles', error });
+    }
+});
 
 
 
-// Route to get a user by ID
 router.get('/scrap', async (req, res) => {
     try {
         const inputUrl = req.query.url;

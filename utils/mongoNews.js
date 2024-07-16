@@ -28,14 +28,24 @@ async function createNews(newsData) {
 // function to batch create news articles
 async function batchCreateNews(newsArticles) {
   try {
+      const insertOptions = {
+          ordered: false, // Ignore duplicates and continue with other documents
+      };
+
       // Use insertMany to insert multiple documents
-      const result = await News.insertMany(newsArticles);
-      // console.log('Batch insert successful:', result);
+      const result = await News.insertMany(newsArticles, insertOptions);
       console.log('Batch insert successful');
+      // console.log('Batch insert successful:', result);
   } catch (error) {
-      console.error('Error in batch insert:', error);
+      // MongoDB's duplicate key error (E11000) will not be treated as an error here
+      if (error.code === 11000) {
+          console.warn('Some documents were not inserted due to duplicates.');
+      } else {
+          console.error('Error in batch insert:', error);
+      }
   }
 }
+
 
 // Updates a news document in the MongoDB database.
 async function updateNews(newsId, updatedFields) {

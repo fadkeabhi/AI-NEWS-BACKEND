@@ -64,24 +64,29 @@ const safetySetting = [
 ];
 
 
-async function getGeminiResponse(systemInstruction, prompt, generationConfig=generationConfig) {
+async function getGeminiResponse(systemInstruction, prompt, generationConfig = generationConfig) {
 
-    const model = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
-        systemInstruction: systemInstruction,
-    });
-    
-    const chatSession = model.startChat({
-        generationConfig,
-        safetySetting,
-        history: [
-        ],
-    });
+    try {
+        const model = genAI.getGenerativeModel({
+            model: "gemini-1.5-flash",
+            systemInstruction: systemInstruction,
+        });
+
+        const chatSession = model.startChat({
+            generationConfig,
+            safetySetting,
+            history: [
+            ],
+        });
 
 
-    const result = await chatSession.sendMessage(prompt);
-    // console.log(result.response.text());
-    return result.response.text();
+        const result = await chatSession.sendMessage(prompt);
+        // console.log(result.response.text());
+        return result.response.text();
+    } catch(err){
+        console.error("Error in gemini", err);
+        return null;
+    }
 }
 
 
@@ -97,9 +102,9 @@ async function AIGetNewsSummeryAndQuestionsWithTags(data) {
     const systemInstruction = process.env.SystemInstructionAIGetNewsSummeryAndQuestionsWithTags;
     generationConfig.responseMimeType = "application/json";
     const result = await getGeminiResponse(systemInstruction, data, generationConfig)
-    return JSON.parse(result);;
+    return JSON.parse(result);
 }
 
 
 
-module.exports = {AIGetNewsFromRaw, AIGetNewsSummeryAndQuestionsWithTags}
+module.exports = { AIGetNewsFromRaw, AIGetNewsSummeryAndQuestionsWithTags }

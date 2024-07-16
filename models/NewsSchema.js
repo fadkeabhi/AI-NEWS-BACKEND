@@ -57,6 +57,13 @@ const NewsSchema = new Schema({
     },
 });
 
+// Add index on the createdAt field
+NewsSchema.index({ createdAt: 1 });
+
+// Add index on the tags field
+NewsSchema.index({ tags: 1 });
+
+
 // Create a model based on the schema
 const News = mongoose.model('News', NewsSchema);
 
