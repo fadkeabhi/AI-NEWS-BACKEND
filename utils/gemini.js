@@ -2,6 +2,7 @@ const {
     GoogleGenerativeAI,
     HarmCategory,
     HarmBlockThreshold,
+    GoogleGenerativeAIResponseError
 } = require("@google/generative-ai");
 
 const apiKey = process.env.GEMINI_API_KEY;
@@ -83,9 +84,15 @@ async function getGeminiResponse(systemInstruction, prompt, generationConfig = g
         const result = await chatSession.sendMessage(prompt);
         // console.log(result.response.text());
         return result.response.text();
-    } catch(err){
-        console.error("Error in gemini", err);
-        return null;
+    } catch (error) {
+        if (error instanceof GoogleGenerativeAIResponseError && error.message.includes('Candidate was blocked due to SAFETY')) {
+            console.error('Generated content was blocked due to safety concerns.');
+            return JSON.stringify({ error: "safety" });
+        } else {
+            // Handle other errors
+            console.error('Error:', error);
+            return JSON.stringify({ error: "unknown" });
+        }
     }
 }
 
@@ -101,8 +108,12 @@ async function AIGetNewsFromRaw(data) {
 async function AIGetNewsSummeryAndQuestionsWithTags(data) {
     const systemInstruction = process.env.SystemInstructionAIGetNewsSummeryAndQuestionsWithTags;
     generationConfig.responseMimeType = "application/json";
-    const result = await getGeminiResponse(systemInstruction, data, generationConfig)
-    return JSON.parse(result);
+    const result = await getGeminiResponse(systemInstruction, data, generationConfig);
+    try{
+        return JSON.parse(result);
+    } catch(err){
+        console.error("invalid json");
+    }
 }
 
 

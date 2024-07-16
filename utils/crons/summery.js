@@ -4,9 +4,9 @@ const { AIGetNewsSummeryAndQuestionsWithTags } = require("../gemini");
 async function processNewsWithoutSummary() {
     try {
         // Find 5 news documents where summary is null
-        const newsList = await News.find({ summary: null })
+        const newsList = await News.find({ summary: null, isSafetyError: { $ne: true } })
             .sort({ createdAt: -1 })
-            .limit(5);
+            .limit(process.env.noOfArticleesToProcessAtOnce);
 
         // Check if there are any news documents to process
         if (newsList.length === 0) {
@@ -21,19 +21,20 @@ async function processNewsWithoutSummary() {
 
             // console.log(genimiResponse)
 
-            if (genimiResponse) {
+            if (!genimiResponse.error) {
                 // Update the news document with the generated summary and questions
                 news.summary = genimiResponse.summary;
                 news.tags = genimiResponse.tags;
                 news.questions = genimiResponse.questions;
 
-                // Save the updated news document
-                await news.save();
-
-                return news;
+            } else if (genimiResponse.error == "safety") {
+                news.isSafetyError = true;
             }
 
-            return null;
+            // Save the updated news document
+            await news.save();
+
+            return news;
 
         }));
 

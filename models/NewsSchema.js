@@ -55,6 +55,10 @@ const NewsSchema = new Schema({
         }],
         
     },
+    isSafetyError: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 // Add index on the createdAt field
