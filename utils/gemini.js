@@ -93,8 +93,8 @@ async function AIGetNewsFromRaw(data) {
     return result;
 }
 
-async function AIGetNewsSummeryAndQuestions(data) {
-    const systemInstruction = process.env.SystemInstructionAIGetNewsSummeryAndQuestions;
+async function AIGetNewsSummeryAndQuestionsWithTags(data) {
+    const systemInstruction = process.env.SystemInstructionAIGetNewsSummeryAndQuestionsWithTags;
     generationConfig.responseMimeType = "application/json";
     const result = await getGeminiResponse(systemInstruction, data, generationConfig)
     return JSON.parse(result);;
@@ -102,4 +102,4 @@ async function AIGetNewsSummeryAndQuestions(data) {
 
 
 
-module.exports = {AIGetNewsFromRaw, AIGetNewsSummeryAndQuestions}
+module.exports = {AIGetNewsFromRaw, AIGetNewsSummeryAndQuestionsWithTags}

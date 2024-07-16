@@ -14,31 +14,46 @@ const NewsSchema = new Schema({
     },
     rawContent: {
         type: String,
-        required: true,
+        default: null,
     },
     aiCleanedContent: {
         type: String,
-        required: true,
+        default: null,
     },
     headline: {
         type: String,
-        required: true,
+        default: null,
     },
     imageUrl: {
         type: String,
-        required: true,
+        default: null,
     },
     imageAlt: {
         type: String,
-        required: true,
+        default: null,
     },
     publishedAt: {
         type: String,
-        default: Date.now,
+        default: null,
+    },
+    tags: {
+        type: [String],
+        default: null,
     },
     createdAt: {
         type: Date,
         default: Date.now,
+    },
+    summary: {
+        type: String,
+        default: null,
+    },
+    questions: {
+        type: [{
+            question: String,
+            answer: String
+        }],
+        
     },
 });
 

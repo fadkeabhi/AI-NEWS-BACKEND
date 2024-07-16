@@ -25,6 +25,42 @@ async function createNews(newsData) {
   }
 }
 
+// function to batch create news articles
+async function batchCreateNews(newsArticles) {
+  try {
+      // Use insertMany to insert multiple documents
+      const result = await News.insertMany(newsArticles);
+      // console.log('Batch insert successful:', result);
+      console.log('Batch insert successful');
+  } catch (error) {
+      console.error('Error in batch insert:', error);
+  }
+}
+
+// Updates a news document in the MongoDB database.
+async function updateNews(newsId, updatedFields) {
+  try {
+      // Find the news document by ID and update it with the provided fields
+      const updatedNews = await News.findByIdAndUpdate(
+          newsId,
+          { $set: updatedFields },
+          { new: true, runValidators: true }
+      );
+
+      // If no document is found, return an error message
+      if (!updatedNews) {
+          throw new Error('News document not found');
+      }
+
+      // Return the updated news document
+      return updatedNews;
+  } catch (error) {
+      // Handle any errors that occur during the update
+      console.error(`Error updating news: ${error.message}`);
+      throw error;
+  }
+}
+
 // Get news article by URL
 async function getNewsByUrl(url) {
   try {
@@ -44,4 +80,6 @@ async function getNewsByUrl(url) {
 module.exports = {
   createNews,
   getNewsByUrl,
+  batchCreateNews,
+  updateNews,
 };
