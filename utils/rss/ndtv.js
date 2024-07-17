@@ -3,8 +3,8 @@ const { fetchAndParseRSS } = require("../rssFetchParse");
 
 const rssLinks = {
     "Top Stories": "https://feeds.feedburner.com/ndtvnews-top-stories",
-    "Latest Stories": "https://feeds.feedburner.com/ndtvnews-latest",
-    "Trending Stories": "https://feeds.feedburner.com/ndtvnews-trending-news",
+    // "Latest Stories": "https://feeds.feedburner.com/ndtvnews-latest",
+    // "Trending Stories": "https://feeds.feedburner.com/ndtvnews-trending-news",
     // "India": "https://feeds.feedburner.com/ndtvnews-india-news",
     // "World": "https://feeds.feedburner.com/ndtvnews-world-news",
     // // "Business": "https://feeds.feedburner.com/ndtvprofit-latest",

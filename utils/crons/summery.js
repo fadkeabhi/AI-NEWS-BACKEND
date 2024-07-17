@@ -46,4 +46,42 @@ async function processNewsWithoutSummary() {
     }
 }
 
-module.exports = processNewsWithoutSummary;
+
+async function processSingleNewsWithoutSummary(id) {
+    try {
+        // Find 5 news documents where summary is null
+        const newsArticle = await News.findById(id);
+
+        // Check if there are any news documents to process
+        if (!newsArticle) {
+            console.log('News not found.');
+            return;
+        }
+
+
+        const genimiResponse = await AIGetNewsSummeryAndQuestionsWithTags(newsArticle.rawContent);
+
+        // console.log(genimiResponse)
+
+        if (!genimiResponse.error) {
+            // Update the news document with the generated summary and questions
+            newsArticle.summary = genimiResponse.summary;
+            newsArticle.tags = genimiResponse.tags;
+            newsArticle.questions = genimiResponse.questions;
+
+        } else if (genimiResponse.error == "safety") {
+            newsArticle.isSafetyError = true;
+        }
+
+        // Save the updated news document
+        await newsArticle.save();
+
+        // console.log('Processed and updated news documents:', updatedNewsList);
+        console.log('Processed and updated news documents');
+    } catch (error) {
+        console.error(`Error processing news: ${error.message}`);
+        throw error;
+    }
+}
+
+module.exports = {processNewsWithoutSummary, processSingleNewsWithoutSummary};
