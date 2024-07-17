@@ -1,5 +1,5 @@
 const News = require("../../models/NewsSchema");
-const { AIGetNewsSummeryAndQuestionsWithTags } = require("../gemini");
+const { AIGetNewsSummeryAndQuestionsWithTags, AIGetNewsSummeryAndQuestionsWithTagsInBulk } = require("../gemini");
 
 async function processNewsWithoutSummary() {
     try {
@@ -45,6 +45,58 @@ async function processNewsWithoutSummary() {
     }
 }
 
+async function processNewsWithoutSummaryNew() {
+    try {
+        // Find 5 news documents where summary is null
+        const newsList = await News.find({ summary: null, isSafetyError: { $ne: true } })
+            .sort({ createdAt: -1 })
+            .limit(process.env.noOfArticleesToProcessAtOnceInOneRequest)
+            .select(["_id", "rawContent"]);
+
+        // Check if there are any news documents to process
+        if (newsList.length === 0) {
+            console.log('No news documents with summary as null found.');
+            return;
+        }
+
+        const genimiResponse = await AIGetNewsSummeryAndQuestionsWithTagsInBulk(JSON.stringify(newsList));
+
+
+        if (!genimiResponse?.error) {
+            console.log("no error")
+
+            for (const article of genimiResponse.data) {
+                console.log(article._id)
+                console.log(article.summary)
+                console.log(article.tags)
+                console.log(article.questions)
+
+                const updatedArticle = await News.findByIdAndUpdate(
+                    article._id,
+                    {
+                        summary: article.summary,
+                        tags: article.tags,
+                        questions: article.questions
+                    },
+                    { new: true }
+                );
+                // if (!updatedArticle) {
+                //     console.log(`Article with ID ${article._id} not found or not updated`);
+                // } else {
+                //     console.log(`Article with ID ${article._id} updated successfully`);
+                // }
+            }
+
+        } else if (genimiResponse.error == "safety") {
+            console.log("safety issue");
+        }
+
+        console.log('Processed and updated news documents');
+    } catch (error) {
+        console.error(`Error processing news: ${error.message}`);
+    }
+}
+
 
 async function processSingleNewsWithoutSummary(id) {
     try {
@@ -57,7 +109,7 @@ async function processSingleNewsWithoutSummary(id) {
             return;
         }
 
-    
+
         const genimiResponse = await AIGetNewsSummeryAndQuestionsWithTags(newsArticle.rawContent);
 
         // console.log(genimiResponse)
@@ -82,4 +134,4 @@ async function processSingleNewsWithoutSummary(id) {
     }
 }
 
-module.exports = {processNewsWithoutSummary, processSingleNewsWithoutSummary};
+module.exports = { processNewsWithoutSummary, processSingleNewsWithoutSummary, processNewsWithoutSummaryNew };

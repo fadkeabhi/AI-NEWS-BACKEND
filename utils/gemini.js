@@ -114,6 +114,19 @@ async function AIGetNewsSummeryAndQuestionsWithTags(data) {
     generationConfig.responseMimeType = "application/json";
     const result = await getGeminiResponse(systemInstruction, data, generationConfig);
     try{
+        // console.log(result)
+        return JSON.parse(result);
+    } catch(err){
+        console.error("invalid json");
+    }
+}
+
+async function AIGetNewsSummeryAndQuestionsWithTagsInBulk(data) {
+    const systemInstruction = process.env.SystemInstructionAIGetNewsSummeryAndQuestionsWithTagsInBulk;
+    generationConfig.responseMimeType = "application/json";
+    const result = await getGeminiResponse(systemInstruction, data, generationConfig);
+    try{
+        // console.log(result)
         return JSON.parse(result);
     } catch(err){
         console.error("invalid json");
@@ -122,4 +135,4 @@ async function AIGetNewsSummeryAndQuestionsWithTags(data) {
 
 
 
-module.exports = { AIGetNewsFromRaw, AIGetNewsSummeryAndQuestionsWithTags }
+module.exports = { AIGetNewsFromRaw, AIGetNewsSummeryAndQuestionsWithTags, AIGetNewsSummeryAndQuestionsWithTagsInBulk }

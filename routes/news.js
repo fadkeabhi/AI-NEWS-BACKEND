@@ -9,7 +9,7 @@ const { createNews, getNewsByUrl } = require("../utils/mongoNews");
 const { formatDateTime } = require('../utils/time');
 const { getNewsWithPagination, getNewsById } = require('../controllers/NewsController');
 const { rssNDTV } = require('../utils/rss/ndtv');
-const {processNewsWithoutSummary} = require('../utils/crons/summery');
+const {processNewsWithoutSummary, processNewsWithoutSummaryNew} = require('../utils/crons/summery');
 
 
 // Fetch news articles with pagination
@@ -46,6 +46,18 @@ router.get('/invoke/ai/summery', async (req, res) => {
     try {
         console.log("AI summery invoked")
         processNewsWithoutSummary();
+        res.status(200).json({status:"invoked"});
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Error invoking ai summery', error });
+    }
+});
+
+// Initialise NDTV RSS
+router.get('/invoke/ai/summery/new', async (req, res) => {
+    try {
+        console.log("AI summery invoked")
+        processNewsWithoutSummaryNew();
         res.status(200).json({status:"invoked"});
     } catch (error) {
         console.error(error)

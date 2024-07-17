@@ -57,7 +57,6 @@ const NewsSchema = new Schema({
             question: String,
             answer: String
         }],
-        
     },
     isSafetyError: {
         type: Boolean,

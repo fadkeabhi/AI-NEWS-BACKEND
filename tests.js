@@ -33,7 +33,7 @@ require('dotenv').config({ path: __dirname + '/.env' })
 // -------------------------------------------------------------------------------
 
 const mongoose = require('mongoose');
-const processNewsWithoutSummary = require('./utils/crons/summery');
+const {processNewsWithoutSummaryNew} = require('./utils/crons/summery');
 
 mongoose.connect(process.env.mongoURL, { family: 4 });
 
@@ -43,4 +43,4 @@ db.once('open', () => {
   console.log('Connected to MongoDB');
 });
 
-processNewsWithoutSummary()
+processNewsWithoutSummaryNew()
