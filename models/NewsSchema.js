@@ -3,6 +3,10 @@ const Schema = mongoose.Schema;
 
 // Define the schema for the scraped news
 const NewsSchema = new Schema({
+    newsId: {
+        type: Number,
+        unique: true,
+    },
     url: {
         type: String,
         required: true,
@@ -73,6 +77,25 @@ News.init().then(() => {
     console.log("Indexes created");
 }).catch(err => {
     console.error("Error creating indexes: ", err);
+});
+
+// Pre-save hook to generate auto-incrementing newsId
+NewsSchema.pre('save', async function(next) {
+    if (!this.isNew) {
+        return next();
+    }
+
+    try {
+        const counter = await Counter.findByIdAndUpdate(
+            { _id: 'newsId' },
+            { $inc: { sequence_value: 1 } },
+            { new: true, upsert: true }
+        );
+        this.newsId = counter.sequence_value;
+        next();
+    } catch (error) {
+        next(error);
+    }
 });
 
 module.exports = News;
