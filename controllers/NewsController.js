@@ -5,17 +5,17 @@ async function getNewsWithPagination(before, after, limit = 5) {
     const query = {};
 
     if (before) {
-        query.createdAt = { $lt: new Date(before) };
+        query.newsId = { $lt: before };
     }
 
     if (after) {
-        query.createdAt = { $gt: new Date(after) };
+        query.newsId = { $gt: after };
     }
 
     try {
         const newsList = await News.find(query)
-            .select(["_id", "isSafetyError", "hostname", "headline", "imageUrl", "publishedAt", "tags", "createdAt"])
-            .sort({ createdAt: -1 }) // Sort by creation date descending
+            .select(["_id", "isSafetyError", "hostname", "headline", "imageUrl", "publishedAt", "tags", "newsId"])
+            .sort({ newsId: -1 }) // Sort by creation date descending
             .limit(limit); // Limit the number of results
 
         return newsList;
