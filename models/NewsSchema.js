@@ -61,14 +61,18 @@ const NewsSchema = new Schema({
     },
 });
 
-// Add index on the createdAt field
+// Add indexes on the fields
 NewsSchema.index({ createdAt: 1 });
-
-// Add index on the tags field
 NewsSchema.index({ tags: 1 });
-
 
 // Create a model based on the schema
 const News = mongoose.model('News', NewsSchema);
+
+// Ensure indexes are created, including the unique index on the URL
+News.init().then(() => {
+    console.log("Indexes created");
+}).catch(err => {
+    console.error("Error creating indexes: ", err);
+});
 
 module.exports = News;
