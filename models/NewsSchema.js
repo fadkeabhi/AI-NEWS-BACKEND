@@ -63,6 +63,10 @@ const NewsSchema = new Schema({
         type: Boolean,
         default: false,
     },
+    aiProcessingTime: {
+        type: Number,
+        default: null,
+    },
 });
 
 // Add indexes on the fields

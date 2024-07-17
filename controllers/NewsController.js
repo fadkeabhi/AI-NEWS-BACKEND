@@ -36,9 +36,12 @@ async function getNewsById(req, res) {
             return res.status(404).json({ message: 'News article not found' });
         }
 
+        
         // if news does not have a summery trigger summery generation for news
-        if (!newsArticle.summary){
-            console.log("triggered summery for article", newsId)
+        if (!newsArticle.summary && (!newsArticle.aiProcessingTime || Date.now() - newsArticle.aiProcessingTime > 1000)){
+            console.log("triggered summery for article", newsId);
+            newsArticle.aiProcessingTime = Date.now();
+            newsArticle.save();
             processSingleNewsWithoutSummary(newsArticle._id);
         }
 

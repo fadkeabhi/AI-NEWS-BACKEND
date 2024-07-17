@@ -58,7 +58,7 @@ async function processSingleNewsWithoutSummary(id) {
             return;
         }
 
-
+    
         const genimiResponse = await AIGetNewsSummeryAndQuestionsWithTags(newsArticle.rawContent);
 
         // console.log(genimiResponse)
@@ -80,7 +80,6 @@ async function processSingleNewsWithoutSummary(id) {
         console.log('Processed and updated news documents');
     } catch (error) {
         console.error(`Error processing news: ${error.message}`);
-        throw error;
     }
 }
 

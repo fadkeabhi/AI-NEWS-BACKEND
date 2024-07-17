@@ -11,4 +11,6 @@ const formatDateTime = (unknownDateString) => {
     }
 }
 
-module.exports = {formatDateTime}
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
+
+module.exports = {formatDateTime, delay}
