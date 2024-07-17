@@ -7,7 +7,7 @@ const {AIGetNewsFromRaw} = require("../utils/gemini")
 
 const { createNews, getNewsByUrl } = require("../utils/mongoNews");
 const { formatDateTime } = require('../utils/time');
-const { getNewsWithPagination } = require('../controllers/NewsController');
+const { getNewsWithPagination, getNewsById } = require('../controllers/NewsController');
 const { rssNDTV } = require('../utils/rss/ndtv');
 const processNewsWithoutSummary = require('../utils/crons/summery');
 
@@ -24,6 +24,9 @@ router.get('/', async (req, res) => {
         res.status(500).json({ message: 'Error fetching news articles', error });
     }
 });
+
+// Route to get a single news article by ID
+router.get('/:id', getNewsById);
 
 
 // Initialise NDTV RSS

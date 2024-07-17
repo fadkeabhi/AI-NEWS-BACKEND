@@ -2,7 +2,8 @@ const {
     GoogleGenerativeAI,
     HarmCategory,
     HarmBlockThreshold,
-    GoogleGenerativeAIResponseError
+    GoogleGenerativeAIResponseError,
+    GoogleGenerativeAIFetchError
 } = require("@google/generative-ai");
 
 const apiKey = process.env.GEMINI_API_KEY;
@@ -88,7 +89,10 @@ async function getGeminiResponse(systemInstruction, prompt, generationConfig = g
         if (error instanceof GoogleGenerativeAIResponseError && error.message.includes('Candidate was blocked due to SAFETY')) {
             console.error('Generated content was blocked due to safety concerns.');
             return JSON.stringify({ error: "safety" });
-        } else {
+        } else if (error instanceof GoogleGenerativeAIFetchError && error.message.includes('429 Too Many Requests')) {
+            console.error('API Limit excedded.');
+            return JSON.stringify({ error: "limit" });
+        }else {
             // Handle other errors
             console.error('Error:', error);
             return JSON.stringify({ error: "unknown" });
