@@ -21,7 +21,7 @@ async function processNewsWithoutSummary() {
 
             // console.log(genimiResponse)
 
-            if (!genimiResponse.error) {
+            if (!genimiResponse?.error) {
                 // Update the news document with the generated summary and questions
                 news.summary = genimiResponse.summary;
                 news.tags = genimiResponse.tags;
@@ -42,7 +42,6 @@ async function processNewsWithoutSummary() {
         console.log('Processed and updated news documents');
     } catch (error) {
         console.error(`Error processing news: ${error.message}`);
-        throw error;
     }
 }
 
@@ -63,7 +62,7 @@ async function processSingleNewsWithoutSummary(id) {
 
         // console.log(genimiResponse)
 
-        if (!genimiResponse.error) {
+        if (!genimiResponse?.error) {
             // Update the news document with the generated summary and questions
             newsArticle.summary = genimiResponse.summary;
             newsArticle.tags = genimiResponse.tags;
