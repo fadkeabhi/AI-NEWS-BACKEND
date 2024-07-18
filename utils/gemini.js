@@ -1,3 +1,5 @@
+const { jsonrepair } =require('jsonrepair')
+
 const {
     GoogleGenerativeAI,
     HarmCategory,
@@ -127,11 +129,11 @@ async function AIGetNewsSummeryAndQuestionsWithTagsInBulk(data) {
     const result = await getGeminiResponse(systemInstruction, data, generationConfig);
     try{
         // console.log(result)
-        return JSON.parse(result);
+        return JSON.parse(jsonrepair(result));
     } catch(err){
-        console.log("-------------------------------------\n\n\n\n")
-        console.log(result)
-        console.log("-------------------------------------\n\n\n\n")
+        // console.log("-------------------------------------\n\n\n\n")
+        // console.log(result)
+        // console.log("-------------------------------------\n\n\n\n")
         console.error("invalid json");
         return {error: "json"}
     }
