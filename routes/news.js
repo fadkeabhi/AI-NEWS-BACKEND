@@ -10,6 +10,7 @@ const { formatDateTime } = require('../utils/time');
 const { getNewsWithPagination, getNewsById } = require('../controllers/NewsController');
 const { rssNDTV } = require('../utils/rss/ndtv');
 const {processNewsWithoutSummary, processNewsWithoutSummaryNew} = require('../utils/crons/summery');
+const { rssHindustanTimes } = require('../utils/rss/hindustantimes');
 
 
 // Fetch news articles with pagination
@@ -33,6 +34,17 @@ router.get('/:id', getNewsById);
 router.get('/invoke/rss/ndtv', async (req, res) => {
     try {
         rssNDTV();
+        res.status(200).json({status:"invoked"});
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Error fetching news articles', error });
+    }
+});
+
+// Initialise Hindustan Times RSS
+router.get('/invoke/rss/ht', async (req, res) => {
+    try {
+        rssHindustanTimes();
         res.status(200).json({status:"invoked"});
     } catch (error) {
         console.error(error)

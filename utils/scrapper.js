@@ -9,13 +9,13 @@ async function scrapeHindustanTimes(url) {
         const headlineContainer = soup.find('meta', { property: 'og:title' })
         // Extract the headline
         const headline = headlineContainer ? headlineContainer.attrs.content : ' ';
-        console.log(headline)
+        // console.log(headline)
 
 
         // Find the main story details container
         const storyDetailsContainer = soup.find('div', 'storyDetails');
 
-        const content = storyDetailsContainer.getText()
+        const rawContent = storyDetailsContainer.getText()
 
 
         const publishedAt = soup.find('div', 'dateTime').text
@@ -25,7 +25,7 @@ async function scrapeHindustanTimes(url) {
         const imageUrl = image ? image.attrs.src : null;
         const imageAlt = image ? image.attrs.alt : null;
 
-        return { headline, content, imageUrl, imageAlt, publishedAt };
+        return { headline, rawContent, imageUrl, imageAlt, publishedAt, url, hostname:"hindustantimes.com" };
     } catch (error) {
         console.error(`Error scraping Hindustan Times: ${error.message}`);
         return { error: `Failed to scrape ${url}` };
@@ -51,11 +51,11 @@ async function scrapeIndianExpress(url) {
                 if (jsonData.articleBody) {
                     // console.log('LD+JSON content with articleBody:', jsonData);
                     const headline = jsonData.headline;
-                    const content = jsonData.articleBody;
+                    const rawContent = jsonData.articleBody;
                     const imageUrl = jsonData.image?.url || jsonData.image;
                     const imageAlt = jsonData.headline;
                     const publishedAt = jsonData.datePublished;
-                    return { headline, content, imageUrl, imageAlt, publishedAt };
+                    return { headline, rawContent, imageUrl, imageAlt, publishedAt, url, hostname:"indianexpress.com"  };
                 }
             } catch (error) {
                 console.error('Error parsing JSON:', error);
@@ -72,5 +72,4 @@ async function scrapeIndianExpress(url) {
 module.exports = {
     'hindustantimes.com': scrapeHindustanTimes,
     'indianexpress.com': scrapeIndianExpress,
-    scrapeIndianExpress
 };

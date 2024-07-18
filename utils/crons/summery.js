@@ -69,7 +69,9 @@ async function processNewsWithoutSummaryNew() {
             }
         } else if (genimiResponse.error == "safety") {
             console.log("safety issue");
-        }
+        } else if (genimiResponse.error == "json") {
+            console.log("json issue");
+        } 
         console.log('Processed and updated news documents');
     }
 

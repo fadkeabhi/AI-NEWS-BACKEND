@@ -129,7 +129,11 @@ async function AIGetNewsSummeryAndQuestionsWithTagsInBulk(data) {
         // console.log(result)
         return JSON.parse(result);
     } catch(err){
+        console.log("-------------------------------------\n\n\n\n")
+        console.log(result)
+        console.log("-------------------------------------\n\n\n\n")
         console.error("invalid json");
+        return {error: "json"}
     }
 }
 
