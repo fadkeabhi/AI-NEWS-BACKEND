@@ -1,5 +1,5 @@
 require('dotenv').config({ path: __dirname + '/.env' })
-
+const cors = require('cors');
 const express = require('express');
 const mongoose = require('mongoose');
 
@@ -16,6 +16,15 @@ const newsRoutes = require('./routes/news');
 
 const app = express();
 
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN,
+    credentials: true,
+  })
+);
+app.use(express.json());
+app.use(express.urlencoded({extended: true}))
+app.use(cookieParser())
 
 app.get('/', async (req, res) => {
   res.send("started")
