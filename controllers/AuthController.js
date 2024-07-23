@@ -1,4 +1,4 @@
-const { User } = require("../Models/UserModel.js");
+const { User } = require("../models/UserModel.js");
 const { asyncHandler } = require("../Utils/AsyncHandler.js");
 const jwt = require("jsonwebtoken");
 
@@ -18,7 +18,7 @@ const generateAccessAndRefreshToken = async (userId) => {
 };
 
 const SigninController = async (req, res) => {
-  const { email, lastname, firstname, phone, password } = req.body;
+  const { email, lastName, firstName, phone, password } = req.body;
 
   try {
     const userCheck = await User.find({ email: email });
@@ -27,7 +27,7 @@ const SigninController = async (req, res) => {
       return res.status(409).json({ error: "User already exits!" });
     }
 
-    const user = await User.create({ firstname, lastname, phone, email, password, role:"user" });
+    const user = await User.create({ firstName, lastName, phone, email, password, role:"user" });
 
     const createdUser = await User.findById(user._id).select(
       "-password -refreshToken"

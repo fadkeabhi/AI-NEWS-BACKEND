@@ -5,14 +5,14 @@ const bcrypt = require ("bcrypt")
 
 const userSchema = new Schema(
     {
-        firstname: {
+        firstName: {
             type: String,
             required: true,
             lowercase: true,
             trim: true, 
             index: true
         },
-        lastname: {
+        lastName: {
             type: String,
             required: true,
             lowercase: true,
@@ -21,7 +21,7 @@ const userSchema = new Schema(
         },
         phone: {
             type: Number,
-            required: true,
+            // required: true,
             unique: true,
             lowercase: true,
             trim: true, 

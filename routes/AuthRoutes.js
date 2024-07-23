@@ -4,7 +4,7 @@ const { Router } = require ("express");
 
 const router = Router();
 
-router.post("/signin",SigninController);
+router.post("/signup",SigninController);
 router.post("/login",LoginController);
 router.post("/logout",verifyJWT,LogoutController);
 router.post("/refresh",refreshAccessTokenController);
