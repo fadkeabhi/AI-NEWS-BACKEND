@@ -1,5 +1,5 @@
 const { LoginController, LogoutController, SigninController, refreshAccessTokenController } = require( "../controllers/AuthController.js");
-const { verifyJWT } = require ("../Middleware/AuthMiddleware.js");
+const { verifyJWT } = require ("../middleware/AuthMiddleware.js");
 const { Router } = require ("express");
 
 const router = Router();

@@ -1,5 +1,5 @@
 const { User } = require("../models/UserModel.js");
-const { asyncHandler } = require("../Utils/AsyncHandler.js");
+const { asyncHandler } = require("../utils/AsyncHandler.js");
 const jwt = require("jsonwebtoken");
 
 const generateAccessAndRefreshToken = async (userId) => {
