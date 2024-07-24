@@ -47,7 +47,7 @@ const SigninController = async (req, res) => {
       userCheck.otpExpiry = otpExpiry;
       await userCheck.save();
 
-      await sendOtpEmail(email, otp);
+      await sendOtpEmail(email, firstName, otp);
 
       return res.status(201).json({
         status: "success",
@@ -69,7 +69,7 @@ const SigninController = async (req, res) => {
       otpExpiry
     });
 
-    await sendOtpEmail(email, otp);
+    await sendOtpEmail(email, firstName, otp);
 
     res.status(201).json({
       status: "success",
@@ -80,6 +80,45 @@ const SigninController = async (req, res) => {
     return res.status(500).json({ message: "Error occurred!" });
   }
 };
+
+const OtpRegenerateController = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const userCheck = await User.findOne({ email: email });
+
+
+    if (userCheck) {
+      // if no otp expiry then user is verified
+      if (!userCheck.otpExpiry) {
+        return res.status(409).json({ error: "User already verified!" });
+      }
+      // Check if OTP was requested within the last 10 minutes
+      if (userCheck.otpExpiry && userCheck.otpExpiry > Date.now()) {
+        return res.status(429).json({ error: "OTP request too soon. Please wait a few minutes before trying again." });
+      }
+
+      // OTP is expired, generate a new OTP and update expiry
+      const otp = crypto.randomInt(100000, 999999).toString();
+      const otpExpiry = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
+
+      userCheck.otp = otp;
+      userCheck.otpExpiry = otpExpiry;
+      await userCheck.save();
+
+      await sendOtpEmail(email, firstName, otp);
+
+      return res.status(201).json({
+        status: "success",
+        message: "New OTP sent to your email. Please verify.",
+      });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Error occurred!" });
+  }
+};
+
 
 const verifyOtpController = async (req, res) => {
   const { email, otp } = req.body;
@@ -127,7 +166,8 @@ const verifyOtpController = async (req, res) => {
 };
 
 const testverifyOtpController = async (req, res) => {
-  await sendOtpEmail("fadkeabhi@gmail.com", "123456");
+  await sendOtpEmail("fadkeabhi@gmail.com", "Abhishek", "123456");
+  res.json({ msg: "send" })
 };
 
 
@@ -251,4 +291,4 @@ const refreshAccessTokenController = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { refreshAccessTokenController, LoginController, LogoutController, SigninController, verifyOtpController, testverifyOtpController };
+module.exports = { refreshAccessTokenController, LoginController, LogoutController, SigninController, verifyOtpController, OtpRegenerateController, testverifyOtpController };
