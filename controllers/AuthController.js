@@ -1,10 +1,12 @@
 const { User } = require("../models/UserModel.js");
 const { asyncHandler } = require("../utils/AsyncHandler.js");
 const jwt = require("jsonwebtoken");
+const crypto = require('crypto');
+const { sendOtpEmail } = require("../utils/email.js");
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
-    const user = await User.findById({ _id:userId });
+    const user = await User.findById({ _id: userId });
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
 
@@ -17,31 +19,118 @@ const generateAccessAndRefreshToken = async (userId) => {
   }
 };
 
+
+
+
 const SigninController = async (req, res) => {
   const { email, lastName, firstName, phone, password } = req.body;
 
   try {
-    const userCheck = await User.find({ email: email });
+    const userCheck = await User.findOne({ email: email });
 
-    if (!userCheck) {
-      return res.status(409).json({ error: "User already exits!" });
+
+    if (userCheck) {
+      // if no otp expiry then user is verified
+      if (!userCheck.otpExpiry) {
+        return res.status(409).json({ error: "User already exists!" });
+      }
+      // Check if OTP was requested within the last 10 minutes
+      if (userCheck.otpExpiry && userCheck.otpExpiry > Date.now()) {
+        return res.status(429).json({ error: "OTP request too soon. Please wait a few minutes before trying again." });
+      }
+
+      // OTP is expired, generate a new OTP and update expiry
+      const otp = crypto.randomInt(100000, 999999).toString();
+      const otpExpiry = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
+
+      userCheck.otp = otp;
+      userCheck.otpExpiry = otpExpiry;
+      await userCheck.save();
+
+      await sendOtpEmail(email, otp);
+
+      return res.status(201).json({
+        status: "success",
+        message: "New OTP sent to your email. Please verify.",
+      });
     }
 
-    const user = await User.create({ firstName, lastName, phone, email, password, role:"user" });
+    const otp = crypto.randomInt(100000, 999999).toString();
+    const otpExpiry = Date.now() + 10 * 60 * 1000; // OTP valid for 10 minutes
 
-    const createdUser = await User.findById(user._id).select(
-      "-password -refreshToken"
-    );
+    const user = await User.create({
+      firstName,
+      lastName,
+      phone,
+      email,
+      password,
+      role: "user",
+      otp,
+      otpExpiry
+    });
+
+    await sendOtpEmail(email, otp);
 
     res.status(201).json({
       status: "success",
-      data: createdUser,
+      message: "OTP sent to your email. Please verify.",
     });
   } catch (err) {
     console.log(err);
-    return res.status(500).json({ message: "Error occured!" });
+    return res.status(500).json({ message: "Error occurred!" });
   }
 };
+
+const verifyOtpController = async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({ message: "User not found!" });
+    }
+
+    if (!user?.otp) {
+      return res.status(200).json({ message: "User Already Verified" });
+    }
+
+    if (user.otp !== otp || user.otpExpiry < Date.now()) {
+      return res.status(400).json({ message: "Invalid or expired OTP!" });
+    }
+
+    // OTP is valid, clear the OTP and OTP expiry
+    user.otp = undefined;
+    user.otpExpiry = undefined;
+    await user.save();
+
+    res.status(200).json({
+      status: "success",
+      message: "OTP verified successfully!",
+      data: {
+        user: {
+          id: user._id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          phone: user.phone,
+          role: user.role,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt
+        }
+      }
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Error occurred!" });
+  }
+};
+
+const testverifyOtpController = async (req, res) => {
+  await sendOtpEmail("fadkeabhi@gmail.com", "123456");
+};
+
+
 
 const LoginController = asyncHandler(async (req, res) => {
   try {
@@ -162,4 +251,4 @@ const refreshAccessTokenController = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { refreshAccessTokenController, LoginController, LogoutController, SigninController };
+module.exports = { refreshAccessTokenController, LoginController, LogoutController, SigninController, verifyOtpController, testverifyOtpController };

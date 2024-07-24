@@ -42,7 +42,13 @@ const userSchema = new Schema(
         },
         role:{
             type:String
-        }
+        },
+        otp: {
+            type: String
+        },
+        otpExpiry: {
+            type: Date
+        },
     },
     {
         timestamps: true
