@@ -174,15 +174,13 @@ const testverifyOtpController = async (req, res) => {
 
 const LoginController = asyncHandler(async (req, res) => {
   try {
-    const { email, username, password } = req.body;
+    const { email, password } = req.body;
 
-    if (!email && !username) {
+    if (!email) {
       return res.status(400).json({ error: "Credentials error!" });
     }
 
-    const user = await User.findOne({
-      $or: [{ email }, { username }],
-    });
+    const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(404).json({ error: "User not registered!" });
