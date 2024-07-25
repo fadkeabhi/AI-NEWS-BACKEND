@@ -223,7 +223,7 @@ const LoginController = asyncHandler(async (req, res) => {
   }
 });
 
-const LogoutController = asyncHandler(async (res, req) => {
+const LogoutController = asyncHandler(async (req, res) => {
   const id = req.user._id;
 
   await User.findByIdAndUpdate(id, {
