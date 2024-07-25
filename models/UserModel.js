@@ -5,14 +5,14 @@ const bcrypt = require ("bcrypt")
 
 const userSchema = new Schema(
     {
-        firstname: {
+        firstName: {
             type: String,
             required: true,
             lowercase: true,
             trim: true, 
             index: true
         },
-        lastname: {
+        lastName: {
             type: String,
             required: true,
             lowercase: true,
@@ -21,7 +21,7 @@ const userSchema = new Schema(
         },
         phone: {
             type: Number,
-            required: true,
+            // required: true,
             unique: true,
             lowercase: true,
             trim: true, 
@@ -42,7 +42,13 @@ const userSchema = new Schema(
         },
         role:{
             type:String
-        }
+        },
+        otp: {
+            type: String
+        },
+        otpExpiry: {
+            type: Date
+        },
     },
     {
         timestamps: true
@@ -86,6 +92,6 @@ userSchema.methods.generateRefreshToken = function(){
     )
 }
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.models.User || mongoose.model('User', userSchema);
 
 module.exports = {User};
