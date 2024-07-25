@@ -18,7 +18,7 @@ const verifyJWT = asyncHandler(async (req, res, next) => {
       "-password -refreshToken"
     );
 
-    if (!user) return res.status(401).json({ error: "Unauthorized Access!" });
+    if (!user) return res.status(401).json({ error: "Token Expired!" });
 
     req.user = user;
 

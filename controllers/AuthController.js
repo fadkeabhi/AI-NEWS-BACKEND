@@ -289,4 +289,14 @@ const refreshAccessTokenController = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { refreshAccessTokenController, LoginController, LogoutController, SigninController, verifyOtpController, OtpRegenerateController, testverifyOtpController };
+const healthCheck = asyncHandler(async () => {
+  try {
+    return res
+    .status(200)
+    .json({message:"UP!!"});
+  } catch (err) {
+    return res.status(500).json({ message: "Error occured!" });
+  }
+})
+
+module.exports = { refreshAccessTokenController,healthCheck, LoginController, LogoutController, SigninController, verifyOtpController, OtpRegenerateController, testverifyOtpController };
