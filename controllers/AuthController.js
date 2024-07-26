@@ -307,7 +307,9 @@ const requestPasswordResetController = async (req, res) => {
   user.resetPasswordExpires = Date.now() + parseInt(process.env.PASSWORD_RESET_TOKEN_EXPIRY);
   await user.save();
 
-  await sendResetEmail(email, token);
+  const firstName = user.firstName;
+
+  await sendResetEmail(email, token, firstName);
 
   res.status(200).json({ message: 'Password reset email sent' });
 };
