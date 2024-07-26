@@ -1,4 +1,4 @@
-const { LoginController, LogoutController, SigninController, refreshAccessTokenController, verifyOtpController, testverifyOtpController, OtpRegenerateController, requestPasswordResetController, healthCheck } = require( "../controllers/AuthController.js");
+const { LoginController, LogoutController, SigninController, refreshAccessTokenController, verifyOtpController, testverifyOtpController, OtpRegenerateController, requestPasswordResetController, healthCheck, resetPassword } = require( "../controllers/AuthController.js");
 const { verifyJWT } = require ("../middleware/AuthMiddleware.js");
 const { Router } = require ("express");
 
@@ -14,5 +14,6 @@ router.get("/test",testverifyOtpController);
 router.get("/health",verifyJWT,healthCheck);
 
 router.post("/forget-password",requestPasswordResetController);
+router.post("/forget-password-final",resetPassword);
 
 module.exports = router;
