@@ -2,7 +2,7 @@ const { User } = require("../models/UserModel.js");
 const { asyncHandler } = require("../utils/AsyncHandler.js");
 const jwt = require("jsonwebtoken");
 const crypto = require('crypto');
-const { sendOtpEmail } = require("../utils/email.js");
+const { sendOtpEmail, sendResetEmail } = require("../utils/email.js");
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -289,4 +289,27 @@ const refreshAccessTokenController = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { refreshAccessTokenController, LoginController, LogoutController, SigninController, verifyOtpController, OtpRegenerateController, testverifyOtpController };
+const requestPasswordResetController = async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+
+  // Check if there is already a token that is not expired
+  if (user.resetPasswordExpires && user.resetPasswordExpires > Date.now()) {
+    return res.status(429).json({ message: 'Password reset email already sent. Please check your email.' });
+  }
+
+  const token = crypto.randomBytes(32).toString('hex');
+  user.resetPasswordToken = token;
+  user.resetPasswordExpires = Date.now() + parseInt(process.env.PASSWORD_RESET_TOKEN_EXPIRY);
+  await user.save();
+
+  await sendResetEmail(email, token);
+
+  res.status(200).json({ message: 'Password reset email sent' });
+};
+
+module.exports = { refreshAccessTokenController, LoginController, LogoutController, SigninController, verifyOtpController, OtpRegenerateController, testverifyOtpController, requestPasswordResetController };

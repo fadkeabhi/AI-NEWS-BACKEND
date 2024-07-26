@@ -49,6 +49,12 @@ const userSchema = new Schema(
         otpExpiry: {
             type: Date
         },
+        resetPasswordToken: {
+            type: String
+        },
+        resetPasswordExpires: {
+            type: Date
+        },
     },
     {
         timestamps: true
