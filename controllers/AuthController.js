@@ -312,4 +312,14 @@ const requestPasswordResetController = async (req, res) => {
   res.status(200).json({ message: 'Password reset email sent' });
 };
 
-module.exports = { refreshAccessTokenController, LoginController, LogoutController, SigninController, verifyOtpController, OtpRegenerateController, testverifyOtpController, requestPasswordResetController };
+const healthCheck = asyncHandler(async (req,res) => {
+  try {
+    return res
+    .status(200)
+    .json({message:"UP!!"});
+  } catch (err) {
+    return res.status(500).json({ message: "Error occured!" });
+  }
+})
+
+module.exports = { refreshAccessTokenController,healthCheck, LoginController, LogoutController, SigninController, verifyOtpController, OtpRegenerateController, testverifyOtpController, requestPasswordResetController };
