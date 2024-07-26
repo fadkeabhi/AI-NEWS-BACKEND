@@ -4,6 +4,7 @@ const url = require('url');
 const router = express.Router();
 const scrapers = require("../utils/scrapper")
 const {AIGetNewsFromRaw} = require("../utils/gemini")
+const { verifyJWT } = require ("../middleware/AuthMiddleware.js");
 
 const { createNews, getNewsByUrl } = require("../utils/mongoNews");
 const { formatDateTime } = require('../utils/time');
@@ -28,6 +29,7 @@ router.get('/', async (req, res) => {
 
 // Route to get a single news article by ID
 router.get('/:id', getNewsById);
+router.get('/:id/secured', verifyJWT, getNewsById);
 
 
 // Initialise NDTV RSS
