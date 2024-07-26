@@ -289,7 +289,7 @@ const refreshAccessTokenController = asyncHandler(async (req, res) => {
   }
 });
 
-const healthCheck = asyncHandler(async () => {
+const healthCheck = asyncHandler(async (req,res) => {
   try {
     return res
     .status(200)
