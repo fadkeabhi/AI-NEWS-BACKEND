@@ -8,7 +8,7 @@ const { verifyJWT } = require("../middleware/AuthMiddleware.js");
 
 const { createNews, getNewsByUrl } = require("../utils/mongoNews");
 const { formatDateTime } = require('../utils/time');
-const { getNewsWithPagination, getNewsById, getUniqueTags } = require('../controllers/NewsController');
+const { getNewsWithPagination, getNewsById, getUniqueTags, getNewsByTag } = require('../controllers/NewsController');
 const { rssNDTV } = require('../utils/rss/ndtv');
 const { processNewsWithoutSummary, processNewsWithoutSummaryNew } = require('../utils/crons/summery');
 const { rssHindustanTimes } = require('../utils/rss/hindustantimes');
@@ -27,12 +27,8 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Route to get a single news article by ID
-router.get('/:id', getNewsById);
-router.get('/:id/secured', verifyJWT, getNewsById);
-
 // Route to get unique tags with count
-router.get('/tags/a', async (req, res) => {
+router.get('/tags', async (req, res) => {
 
     const tagsWithCounts = await getUniqueTags();
     if (tagsWithCounts) {
@@ -41,6 +37,69 @@ router.get('/tags/a', async (req, res) => {
         res.status(500).json({ message: 'Error fetching tags' });
     }
 
+});
+
+router.get('/scrap', async (req, res) => {
+    try {
+        const inputUrl = req.query.url;
+        const parsedUrl = new URL(inputUrl);
+        let hostname = parsedUrl.hostname;
+
+        // Check if url already scrapped
+        let oldResult = await getNewsByUrl(parsedUrl.href);
+        if (oldResult) {
+            res.json(oldResult);
+            return;
+        }
+
+        // Remove "www" from the beginning of the hostname if it exists
+        if (hostname.startsWith('www.')) {
+            hostname = hostname.substring(4);
+        }
+
+        const scraper = scrapers[hostname];
+
+        if (scraper) {
+            let result = await scraper(inputUrl);
+            let cleanedContent = null;
+            cleanedContent = await AIGetNewsFromRaw(result.content)
+            result.url = parsedUrl.href;
+            result.hostname = hostname;
+            result.rawContent = result.content;
+            result.aiCleanedContent = cleanedContent || result.content;
+            result.publishedAt = formatDateTime(result.publishedAt);
+            delete result.content
+
+            await createNews(result)
+            res.json(result);
+        } else {
+            res.status(400).json({ error: 'Unsupported site' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
+// Route to get a single news article by ID
+router.get('/:id', getNewsById);
+router.get('/:id/secured', verifyJWT, getNewsById);
+
+
+
+// Route to get news articles by tag
+// use comma separated tags 
+// eg. http://localhost:5001/news/tags/Politics,India
+router.get('/tags/:tag', async (req, res) => {
+    const { tag } = req.params;
+    const tags = tag.split(',');
+    try {
+        const news = await getNewsByTag(tags);
+        res.status(200).json(news);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error fetching news articles by tag', error });
+    }
 });
 
 
@@ -90,51 +149,6 @@ router.get('/invoke/ai/summery/new', async (req, res) => {
         res.status(500).json({ message: 'Error invoking ai summery', error });
     }
 });
-
-
-
-router.get('/scrap', async (req, res) => {
-    try {
-        const inputUrl = req.query.url;
-        const parsedUrl = new URL(inputUrl);
-        let hostname = parsedUrl.hostname;
-
-        // Check if url already scrapped
-        let oldResult = await getNewsByUrl(parsedUrl.href);
-        if (oldResult) {
-            res.json(oldResult);
-            return;
-        }
-
-        // Remove "www" from the beginning of the hostname if it exists
-        if (hostname.startsWith('www.')) {
-            hostname = hostname.substring(4);
-        }
-
-        const scraper = scrapers[hostname];
-
-        if (scraper) {
-            let result = await scraper(inputUrl);
-            let cleanedContent = null;
-            cleanedContent = await AIGetNewsFromRaw(result.content)
-            result.url = parsedUrl.href;
-            result.hostname = hostname;
-            result.rawContent = result.content;
-            result.aiCleanedContent = cleanedContent || result.content;
-            result.publishedAt = formatDateTime(result.publishedAt);
-            delete result.content
-
-            await createNews(result)
-            res.json(result);
-        } else {
-            res.status(400).json({ error: 'Unsupported site' });
-        }
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-
 
 
 module.exports = router;

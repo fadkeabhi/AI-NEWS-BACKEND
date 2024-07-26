@@ -52,6 +52,20 @@ async function getNewsById(req, res) {
     }
 }
 
+async function getNewsByTag(tag) {
+    try {
+        const newsList = await News.find({ tags: { $in: tag } })
+            .select(["_id", "isSafetyError", "hostname", "headline", "imageUrl", "publishedAt", "tags", "newsId"])
+            .sort({ newsId: -1 })
+            .limit(50);
+
+        return newsList;
+    } catch (error) {
+        console.error('Error fetching news by tag:', error);
+        throw error;
+    }
+}
+
 async function getUniqueTags() {
     try {
         const tagsWithCounts = await News.aggregate([
@@ -78,4 +92,4 @@ async function getUniqueTags() {
     }
 }
 
-module.exports = { getNewsWithPagination, getNewsById, getUniqueTags };
+module.exports = { getNewsWithPagination, getNewsById, getUniqueTags, getNewsByTag };
