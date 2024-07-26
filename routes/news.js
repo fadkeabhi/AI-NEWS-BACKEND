@@ -3,14 +3,14 @@ const express = require('express');
 const url = require('url');
 const router = express.Router();
 const scrapers = require("../utils/scrapper")
-const {AIGetNewsFromRaw} = require("../utils/gemini")
-const { verifyJWT } = require ("../middleware/AuthMiddleware.js");
+const { AIGetNewsFromRaw } = require("../utils/gemini")
+const { verifyJWT } = require("../middleware/AuthMiddleware.js");
 
 const { createNews, getNewsByUrl } = require("../utils/mongoNews");
 const { formatDateTime } = require('../utils/time');
-const { getNewsWithPagination, getNewsById } = require('../controllers/NewsController');
+const { getNewsWithPagination, getNewsById, getUniqueTags } = require('../controllers/NewsController');
 const { rssNDTV } = require('../utils/rss/ndtv');
-const {processNewsWithoutSummary, processNewsWithoutSummaryNew} = require('../utils/crons/summery');
+const { processNewsWithoutSummary, processNewsWithoutSummaryNew } = require('../utils/crons/summery');
 const { rssHindustanTimes } = require('../utils/rss/hindustantimes');
 
 
@@ -18,7 +18,7 @@ const { rssHindustanTimes } = require('../utils/rss/hindustantimes');
 router.get('/', async (req, res) => {
     let { before, after, limit } = req.query;
     try {
-        if(!limit){limit = 5};
+        if (!limit) { limit = 5 };
         const news = await getNewsWithPagination(before, after, parseInt(limit));
         res.status(200).json(news);
     } catch (error) {
@@ -31,12 +31,24 @@ router.get('/', async (req, res) => {
 router.get('/:id', getNewsById);
 router.get('/:id/secured', verifyJWT, getNewsById);
 
+// Route to get unique tags with count
+router.get('/tags/a', async (req, res) => {
+
+    const tagsWithCounts = await getUniqueTags();
+    if (tagsWithCounts) {
+        res.status(200).json(tagsWithCounts);
+    } else{
+        res.status(500).json({ message: 'Error fetching tags' });
+    }
+
+});
+
 
 // Initialise NDTV RSS
 router.get('/invoke/rss/ndtv', async (req, res) => {
     try {
         rssNDTV();
-        res.status(200).json({status:"invoked"});
+        res.status(200).json({ status: "invoked" });
     } catch (error) {
         console.error(error)
         res.status(500).json({ message: 'Error fetching news articles', error });
@@ -47,7 +59,7 @@ router.get('/invoke/rss/ndtv', async (req, res) => {
 router.get('/invoke/rss/ht', async (req, res) => {
     try {
         rssHindustanTimes();
-        res.status(200).json({status:"invoked"});
+        res.status(200).json({ status: "invoked" });
     } catch (error) {
         console.error(error)
         res.status(500).json({ message: 'Error fetching news articles', error });
@@ -60,7 +72,7 @@ router.get('/invoke/ai/summery', async (req, res) => {
     try {
         console.log("AI summery invoked")
         processNewsWithoutSummary();
-        res.status(200).json({status:"invoked"});
+        res.status(200).json({ status: "invoked" });
     } catch (error) {
         console.error(error)
         res.status(500).json({ message: 'Error invoking ai summery', error });
@@ -72,7 +84,7 @@ router.get('/invoke/ai/summery/new', async (req, res) => {
     try {
         console.log("AI summery invoked")
         processNewsWithoutSummaryNew();
-        res.status(200).json({status:"invoked"});
+        res.status(200).json({ status: "invoked" });
     } catch (error) {
         console.error(error)
         res.status(500).json({ message: 'Error invoking ai summery', error });
@@ -89,7 +101,7 @@ router.get('/scrap', async (req, res) => {
 
         // Check if url already scrapped
         let oldResult = await getNewsByUrl(parsedUrl.href);
-        if(oldResult){
+        if (oldResult) {
             res.json(oldResult);
             return;
         }
@@ -100,7 +112,7 @@ router.get('/scrap', async (req, res) => {
         }
 
         const scraper = scrapers[hostname];
-        
+
         if (scraper) {
             let result = await scraper(inputUrl);
             let cleanedContent = null;
