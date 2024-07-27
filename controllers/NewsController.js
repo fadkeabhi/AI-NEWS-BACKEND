@@ -52,12 +52,13 @@ async function getNewsById(req, res) {
     }
 }
 
-async function getNewsByTag(tag) {
+async function getNewsByTag(tag, limit = 20, skip = 0) {
     try {
         const newsList = await News.find({ tags: { $in: tag } })
             .select(["_id", "isSafetyError", "hostname", "headline", "imageUrl", "publishedAt", "tags", "newsId"])
             .sort({ newsId: -1 })
-            .limit(50);
+            .skip(skip)
+            .limit(limit);
 
         return newsList;
     } catch (error) {

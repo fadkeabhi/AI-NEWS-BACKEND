@@ -92,9 +92,10 @@ router.get('/:id/secured', verifyJWT, getNewsById);
 // eg. http://localhost:5001/news/tags/Politics,India
 router.get('/tags/:tag', async (req, res) => {
     const { tag } = req.params;
+    const { limit = 20, skip = 0 } = req.query;
     const tags = tag.split(',');
     try {
-        const news = await getNewsByTag(tags);
+        const news = await getNewsByTag(tags, parseInt(limit), parseInt(skip));
         res.status(200).json(news);
     } catch (error) {
         console.error(error);
