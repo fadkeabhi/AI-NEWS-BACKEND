@@ -343,4 +343,30 @@ const healthCheck = asyncHandler(async (req,res) => {
   }
 })
 
-module.exports = { refreshAccessTokenController,healthCheck, LoginController, LogoutController, SigninController, verifyOtpController, OtpRegenerateController, testverifyOtpController, requestPasswordResetController, resetPassword };
+const getUserInfoController = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  try {
+    const user = await User.findById(userId).select("firstName lastName email");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found!" });
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        user: {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+        },
+      },
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Error occurred!" });
+  }
+});
+
+module.exports = { refreshAccessTokenController,healthCheck, LoginController, LogoutController, SigninController, verifyOtpController, OtpRegenerateController, testverifyOtpController, requestPasswordResetController, resetPassword, getUserInfoController };
