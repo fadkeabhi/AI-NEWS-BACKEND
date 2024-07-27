@@ -13,18 +13,23 @@ async function getNewsWithPagination(before, after, limit = 5) {
     }
 
     try {
+        const totalCount = await News.countDocuments(query);
         const newsList = await News.find(query)
             .select(["_id", "isSafetyError", "hostname", "headline", "imageUrl", "publishedAt", "tags", "newsId"])
             .sort({ newsId: -1 }) // Sort by creation date descending
             .limit(limit); // Limit the number of results
 
-        return newsList;
+        const totalPages = Math.ceil(totalCount / limit);
+
+        return {
+            newsList,
+            totalPages
+        };
     } catch (error) {
         console.error('Error fetching news with pagination:', error);
         throw error;
     }
 }
-
 
 async function getNewsById(req, res) {
     try {
@@ -54,13 +59,20 @@ async function getNewsById(req, res) {
 
 async function getNewsByTag(tag, limit = 20, skip = 0) {
     try {
-        const newsList = await News.find({ tags: { $in: tag } })
+        const query = { tags: { $in: tag } };
+        const totalCount = await News.countDocuments(query);
+        const newsList = await News.find(query)
             .select(["_id", "isSafetyError", "hostname", "headline", "imageUrl", "publishedAt", "tags", "newsId"])
             .sort({ newsId: -1 })
             .skip(skip)
             .limit(limit);
 
-        return newsList;
+        const totalPages = Math.ceil(totalCount / limit);
+
+        return {
+            newsList,
+            totalPages
+        };
     } catch (error) {
         console.error('Error fetching news by tag:', error);
         throw error;
