@@ -25,9 +25,9 @@ db.once('open', () => {
   console.log('Connected to MongoDB');
 });
 
-const {rssHindustanTimes} = require("./utils/rss/hindustantimes")
+const {rssBBC} = require("./utils/rss/bbc")
 
-rssHindustanTimes();
+rssBBC();
 
 // db.close();
 

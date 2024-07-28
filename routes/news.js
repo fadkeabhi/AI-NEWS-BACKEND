@@ -12,6 +12,7 @@ const { getNewsWithPagination, getNewsById, getUniqueTags, getNewsByTag } = requ
 const { rssNDTV } = require('../utils/rss/ndtv');
 const { processNewsWithoutSummary, processNewsWithoutSummaryNew } = require('../utils/crons/summery');
 const { rssHindustanTimes } = require('../utils/rss/hindustantimes');
+const { rssBBC } = require('../utils/rss/bbc.js');
 
 
 // Fetch news articles with pagination
@@ -119,6 +120,17 @@ router.get('/invoke/rss/ndtv', async (req, res) => {
 router.get('/invoke/rss/ht', async (req, res) => {
     try {
         rssHindustanTimes();
+        res.status(200).json({ status: "invoked" });
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Error fetching news articles', error });
+    }
+});
+
+// Initialise BBC RSS
+router.get('/invoke/rss/bbc', async (req, res) => {
+    try {
+        rssBBC();
         res.status(200).json({ status: "invoked" });
     } catch (error) {
         console.error(error)

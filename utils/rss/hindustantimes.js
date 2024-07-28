@@ -34,9 +34,6 @@ async function batchScrapper(newsList) {
 
     batchCreateNews(finalNewsList);
     // console.log(finalNewsList[0])
-
-
-
 }
 
 
