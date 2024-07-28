@@ -5,6 +5,7 @@ const router = express.Router();
 const scrapers = require("../utils/scrapper")
 const { AIGetNewsFromRaw } = require("../utils/gemini")
 const { verifyJWT } = require("../middleware/AuthMiddleware.js");
+const { adminVerify } = require("../middleware/AdminMiddleware.js");
 
 const { createNews, getNewsByUrl } = require("../utils/mongoNews");
 const { formatDateTime } = require('../utils/time');
@@ -40,7 +41,7 @@ router.get('/tags', async (req, res) => {
 
 });
 
-router.get('/scrap', async (req, res) => {
+router.get('/scrap', adminVerify, async (req, res) => {
     try {
         const inputUrl = req.query.url;
         const parsedUrl = new URL(inputUrl);
@@ -106,7 +107,7 @@ router.get('/tags/:tag', async (req, res) => {
 
 
 // Initialise NDTV RSS
-router.get('/invoke/rss/ndtv', async (req, res) => {
+router.get('/invoke/rss/ndtv', adminVerify, async (req, res) => {
     try {
         rssNDTV();
         res.status(200).json({ status: "invoked" });
@@ -117,7 +118,7 @@ router.get('/invoke/rss/ndtv', async (req, res) => {
 });
 
 // Initialise Hindustan Times RSS
-router.get('/invoke/rss/ht', async (req, res) => {
+router.get('/invoke/rss/ht', adminVerify, async (req, res) => {
     try {
         rssHindustanTimes();
         res.status(200).json({ status: "invoked" });
@@ -128,7 +129,7 @@ router.get('/invoke/rss/ht', async (req, res) => {
 });
 
 // Initialise BBC RSS
-router.get('/invoke/rss/bbc', async (req, res) => {
+router.get('/invoke/rss/bbc', adminVerify, async (req, res) => {
     try {
         rssBBC();
         res.status(200).json({ status: "invoked" });
@@ -140,7 +141,7 @@ router.get('/invoke/rss/bbc', async (req, res) => {
 
 
 // Initialise NDTV RSS
-router.get('/invoke/ai/summery', async (req, res) => {
+router.get('/invoke/ai/summery', adminVerify, async (req, res) => {
     try {
         console.log("AI summery invoked")
         processNewsWithoutSummary();
@@ -152,7 +153,7 @@ router.get('/invoke/ai/summery', async (req, res) => {
 });
 
 // Initialise NDTV RSS
-router.get('/invoke/ai/summery/new', async (req, res) => {
+router.get('/invoke/ai/summery/new', adminVerify, async (req, res) => {
     try {
         console.log("AI summery invoked")
         processNewsWithoutSummaryNew();
